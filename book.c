@@ -21,7 +21,7 @@ int add_book(Book book)
 	else//添加书 
 	{
 		p1->next = &book;
-		p1 = &book;//要写一个判断是否开辟成功和存储的语句才能再将p1赋值给p2  
+		p1 = &book;//要写一个判断是否开辟成功和存储的语句 
 		p1->next = NULL;
 		head->length += 1;
 	}

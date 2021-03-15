@@ -17,13 +17,17 @@ int add_customer(Customer customer)
 	{
 		head = (CustomerArray*)malloc(Len2);
 		p1 = head->array = (Customer*)malloc(LEN2);
+		p1->account = (char*)malloc(9 * sizeof(char));
+		strcpy(p1->account,librarian);
+		p1->passwords = (char*)malloc(9 * sizeof(char));
+		strcpy(p1->password,librarian);
 		p1->next = NULL;
 		head->length = 1;
 	}
 	else//添加用户 
 	{
-		p1->next = &book;
-		p1 = &book;//要写一个判断是否开辟成功和存储的语句才能再将p1赋值给p2  
+		p1->next = &customer;
+		p1 = &customer;//要写一个判断是否开辟成功和存储的语句
 		p1->next = NULL;
 		head->length += 1;
 	}
@@ -50,13 +54,26 @@ int remove_customer(Customer customer)
 char *find_customer_by_account(char *account)
 {
 	p2 = head->array;
-	while(p2->next !=NULL)
+	while(p2->next != NULL)
 	{
 		p2 = p2->next;
 		if(strcpy(p2->account, account) ==0)
 		{
 			return(p2->password);
 		} 
+	}
+	return 0;
+}
+char *check_customer_existence(char *account)
+{
+	p2 = head->array;
+	while(p2->next != NULL)
+	{
+		p2 = p2->next;
+		if(strcpy(p2->account, account) ==0)
+		{
+			return 1;
+		}
 	}
 	return 0;
 }

@@ -4,7 +4,7 @@
 #define len2 sizeof(CustomerArray)
 typedef struct _customer{
 	char *account;
-	char *password;
+	char *passwords;
 	Customer *next;
 }Customer;
 

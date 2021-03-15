@@ -1,3 +1,4 @@
+
 #ifndef BOOK_MANAGEMENT_GUARD__H 
 #define BOOK_MANAGEMENT_GUARD__H
 #define LEN1 sizeof(Book)
@@ -37,6 +38,9 @@ int add_book(Book book);
 //removes a book from the library
 //returns 0 if the book could be successfully removed, or an error code otherwise.
 int remove_book(Book book);
+//finds book with a given id.
+//returns 0 if the book could be successfully removed, or an error code otherwise.
+int find_book_by_id(unsigned int id);
 //finds books with a given title.
 //returns a BookArray structure, where the field "array" is a newly allocated array of books, or null if no book with the 
 //provided title can be found. The length of the array is also recorded in the returned structure, with 0 in case
