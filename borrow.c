@@ -40,5 +40,5 @@ Borrow *find_customer_from_borrow(Customer *customer)
 		p2 = p2->next;
 		if(p2->customer == customer)return p2;
 	}
-	return p2->next;
+	return NULL;
 }
