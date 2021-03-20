@@ -56,4 +56,22 @@ BookArray find_book_by_author (const char *authors);
 //provided title can be found. The length of the array is also recorded in the returned structure, with 0 in case
 //array is the null pointer.
 BookArray find_book_by_year (unsigned int year);
+Book *find_book_by_id (unsigned int id);
+void _Add_book();
+void _Remove_book();
+static void _Search_for_books();
+void _Display_all_books();
+void Find_book_by_id();
+void Find_book_by_title();
+void Find_book_by_authors();
+void Find_book_by_year();
+static int check_char(char* str);
+char *ask_question(const char *question);
+void show_book_array(Book* boo);
+int find_the_longest_title(Book* temp);
+int find_the_longest_authors(Book* temp);
+void _Borrow_book();
+void _Return_book();
+void _Display_borrowing();
+void clear_BookArray()
 #endifI

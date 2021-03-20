@@ -5,6 +5,20 @@ static BookArray *head, *findbook;
 static Book *p1, *p2, *p3;
 int store_books(FILE *file);
 {
+	FILE *fp;
+	p2 = head->array->next;
+	fp = fopen("file","wb");
+	if(!fp)
+		ferror("Open failed!");
+		return 1;
+	fwrite(head->length,sizeof(unsigned int),1,fp);
+	while(p2)
+	{
+		int leng1 = strlen(p2->title),leng2 = strlen(p2->authors);
+		fwrite(leng1,sizeof(int),1,fp);
+		fwrite(leng2,sizeof(int),1,fp);
+		p2 = p2->next;
+	}
 }
 int load_books(FILE *file);
 {
@@ -29,18 +43,20 @@ int add_book(Book book)
 }
 int remove_book(Book book);
 {
+	Book *re = &book;
 	int flag = 0;
 	p2 = head->array;
-	p3 = head->array->next;
+	p3 = p2->next;
 	while(p3)
 	{
-		if(p3 == &book)
+		if(p3 == re)
 		{
 			p2->next = p3->next;
+			free(re);
 			flag = 1;
 		}
-		p3 = p3->next;
 		p2 = p3;
+		p3 = p3->next;
 	}
 	if(flag == 0)return 1;
 	if(flag == 1)return 0;
@@ -67,7 +83,7 @@ BookArray find_book_by_title (const char *title)
 	}
 	return findbook;
 } 
-BookArray find_book_by_authors (const char *authors);
+BookArray find_book_by_authors (const char *authors)
 { 
 	free(findbook->array);
 	free(findbook);
@@ -90,7 +106,7 @@ BookArray find_book_by_authors (const char *authors);
 	}
 	return findbook;
 } 
-BookArray find_book_by_year (unsigned int year);
+BookArray find_book_by_year (unsigned int year)
 {
 	free(findbook->array);
 	free(findbook);
@@ -112,7 +128,7 @@ BookArray find_book_by_year (unsigned int year);
 	}
 	return findbook;
 }
-Book *find_book_by_id (unsigned int id);
+Book *find_book_by_id (unsigned int id)
 {
 	p2 = head->array;
 	while(p2)
@@ -125,7 +141,7 @@ Book *find_book_by_id (unsigned int id);
 	}
 	return NULL;
 }
-static void _Add_book()
+void _Add_book()
 {
 	int flag1 = flag2 = flag3 = 0;  
 	Book *temp = (Book*)malloc(LEN1);
@@ -147,7 +163,7 @@ static void _Add_book()
 		fflush(stdin);//需要清空缓存区
 	}
 }
-static void _Remove_book()
+void _Remove_book()
 {
 	unsigned int id;
 	Book *temp;
@@ -167,7 +183,7 @@ static void _Remove_book()
 		fflush(stdin);
 	}
 }
-static void _Search_for_books();
+static void _Search_for_books()
 {
 	int choice = 5;
 	do {
@@ -195,19 +211,20 @@ static void _Search_for_books();
 		}
 	}while(choice != 5);
 }
-void _Display_all_books();
+void _Display_all_books()
 {
-	
+	if(!head)printf("Sorry, ther are no book, please wait for the librarian to add some books.");
+	else show_book_array(head);
 }
 void Find_book_by_id()
 {
 	unsigned int temp1; 
-	BookArray *temp2;
+	Book *temp2;
 	printf("What is the id of the book you wish to find");
-	if(scanf("%u",&temp););
+	if(scanf("%u",&temp1););
 	{
 		if(temp2 = find_book_by_id(temp1))
-		show_book_array(temp2);//还没写呢 
+		show_book_array(temp2);// 
 		else printf("Sorry, this book can not be founded.");
 	}
 	else printf("\nSorry, the id you entered was invalid, please try again.");
@@ -223,7 +240,7 @@ void Find_book_by_title()
 	else 
 	{
 		if(temp2 = find_book_by_title(temp1))
-		show_book_array(temp2);
+		show_book_array(temp2->array);
 		else printf("Sorry, this book can not be founded.");
 	}
 	free(temp1);
@@ -239,7 +256,7 @@ void Find_book_by_authors()
 	else 
 	{
 		if(temp2 = find_book_by_authors(temp1))
-		show_book_array(temp2);
+		show_book_array(temp2->array);
 		else printf("Sorry, this book can not be founded.");
 	}
 	free(temp1);
@@ -252,7 +269,7 @@ void Find_book_by_year()
 	if(scanf("%u",&temp1));
 	{
 		if(temp2 = find_book_by_year(temp1))
-		show_book_array(temp2);
+		show_book_array(temp2->array);
 		else printf("Sorry, this book can not be founded.");
 	}
 	else printf("\nSorry, the id you entered was invalid, please try again.");
@@ -289,23 +306,80 @@ char *ask_question(const char *question)
 
 		next_chunk = answer + strlen(answer); //take the new read into account
 		++iteration;
-	} while (* (next_chunk-1) != '\n');
+	} while (* (next_chun -1) != '\n');
 
-	*(next_chunk-1) = 0; //truncate the string eliminating the new line.
+	*(next_chunk - 1) = 0; //truncate the string eliminating the new line.
 
 	return answer;
 }
-void show_book_array(BookArray* temp)
+void show_book_array(Book* boo)
 {
-	
+	unsigned int title_length, authors_length;
+	title_length = find_the_longest_title(boo);
+	authors_length = find_the_longest_authors(boo);
+	if(title_length < 4)title_length = 4;
+	if(authors_length <4)authors_length = 4;
+	title_length -= 4;
+	authors_length -=4;
+	char tit[title_length];
+	char aut[authors_length];
+	for(int i = 0;i < title_length;i++)tit[i] = ' ';
+	for(int i = 0;i < authors_length;i++)aut[i] = ' ';
+	printf("Id\tTitle%s\tAuthors%s\tYear\tCopies\n", tit, aut);
+	while(boo->next)
+	{
+		boo = boo->next;
+		char titl[title_length + 4 - strlen(boo->title)];
+		char auth[authors_length + 4 - strlen(boo->authors)];
+		for(int j = 0;j < title_length + 4 - strlen(boo->title);i++)titl[j] = ' ';
+		for(int j = 0;j < authors_length + 4 - strlen(boo->authors);i++)auth[j] = ' ';
+		printf("%u\t%s%s\t%s%s\t%u\t%u\n", boo->id, boo->title, titl, boo->authors, auth, boo->year, boo->copies);
+	}
 } 
-int find_the_longest_title(BookArray* temp)
+
+int find_the_longest_title(Book* temp)
 {
-	int max = 0;
-	while(p2 = temp->array->next)
+	unsigned int max = 0;
+	while(p2 = temp->next)
 	{
 		max = strlen(p2->title) > max?strlen(p2->title):max;
 		p2 = p2->next;
 	}
 	return max;
 } 
+int find_the_longest_authors(Book* temp)
+{
+	unsigned int max = 0;
+	while(p2 = temp->next)
+	{
+		max = strlen(p2->authors) > max?strlen(p2->authors):max;
+		p2 = p2->next;
+	}
+	return max;
+}
+void _Borrow_book()
+{
+	
+}
+void _Return_book()
+{
+	
+}
+void _Display_borrowing()
+{
+}
+void clear_BookArray()
+{
+	free(findbook->array);
+	free(findbook);
+	p2 = p3 = head->array;
+	while(p2)
+	{
+		p3 = p3->next; 
+		free(p2->authors);
+		free(p2->title);
+		free(p2);
+		p2 = p3;
+	}
+}
+

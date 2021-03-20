@@ -47,21 +47,22 @@ static void _Register_an_account()
 	else 
 	{
 		printf("Sorry, registration unsuccessful, the username you entered already exists.");
+		free(c);
 	}
 	free(username);
 	free(passwords);
-	free(c);
 }
 static void _Login();
 {
 	Customer *temp = (Customer*)malloc(LEN2);
 	char *username = ask_question("Please enter your username:\n");
 	char *passwords = ask_question("Please enter you passwords:\n");
-	if(!strcmpy(find_customer_by_account(username), passwords))
+	if(strcmpy(find_customer_by_account(username), passwords) == 0)
 	{
 		if(strcpy(username, "librarian") == 0) librarian_interface;//π‹¿Ì‘±
 		else customer_interface(username);
 	}
+	else printf("Sorry, you may enter wrong account or passwords, please check it.");
 	free(username);
 	free(passwords);
 }
@@ -97,11 +98,11 @@ static void librarian_interface()
 }
 static void customer_interface(char *username)
 {
-	int choice = 5;
+	int choice = 6;
 	do
 	{
 		printf("(Logged in as :%s\n)",username);
-		char *answer = ask_question("Please choose an option:\n1) Borrow a book\n2) Return a book\n3) Search for books\n4) Display all books\n5) Log out\n");
+		char *answer = ask_question("Please choose an option:\n1) Borrow a book\n2) Return a book\n3) Search for books\n4) Display all books\n5) Display borrowing\n6) Log out\n");
 		choice = atoi(answer);
 		free(answer);
 		switch(choice)
@@ -119,13 +120,17 @@ static void customer_interface(char *username)
 				_Display_all_books();
 				break;
 			case 5:
+				_Display_borrowing();
+			case 6:
 				break;
 			default:
 				printf("Sorry, the option you entered was invalid, please try again.\n");
-		}while(choice != 5);
+		}while(choice != 6);
 	}
 }
-static void _Borrow_book()
+void run_interface()
 {
+	main_menu();
 	
 }
+
