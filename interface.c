@@ -1,8 +1,9 @@
 #include<stdio.h> 
-#include<book.h>
-#include<customer.h>
 #include<string.h>
-
+#include"book.h"
+#include"customer.h"
+#include"interface.h"
+#include"borrow.h"
 static void main_menu()
 {
 	int choice = 5;
@@ -36,13 +37,13 @@ static void main_menu()
 static void _Register_an_account()
 {
 	Customer *c = (Customer*)malloc(LEN2);
-	char *username = ask_qusetion("Please enter your username:\n");
-	char *passwords = ask_qusetion("Please enter your passwords:\n");
+	char *username = ask_question("Please enter your username:\n");
+	char *passwords = ask_question("Please enter your passwords:\n");
 	if(check_customer_existece(username) == 0)
 	{
 		c->account = username;
 		c->passwords = passwords;
-		if(add_customer(c) == 0)printf("Registered library account successfully.\n");
+		if(add_customer(*c) == 0)printf("Registered library account successfully.\n");
 	}
 	else 
 	{
@@ -52,14 +53,14 @@ static void _Register_an_account()
 	free(username);
 	free(passwords);
 }
-static void _Login();
+static void _Login()
 {
 	Customer *temp = (Customer*)malloc(LEN2);
 	char *username = ask_question("Please enter your username:\n");
 	char *passwords = ask_question("Please enter you passwords:\n");
 	if(strcmpy(find_customer_by_account(username), passwords) == 0)
 	{
-		if(strcpy(username, "librarian") == 0) librarian_interface;//管理员
+		if(strcpy(username, "librarian") == 0) librarian_interface();//管理员
 		else customer_interface(username);
 	}
 	else printf("Sorry, you may enter wrong account or passwords, please check it.");
@@ -125,12 +126,17 @@ static void customer_interface(char *username)
 				break;
 			default:
 				printf("Sorry, the option you entered was invalid, please try again.\n");
-		}while(choice != 6);
-	}
-}
-void run_interface()
-{
-	main_menu();
-	
+		}
+	}while(choice != 6);
 }
 
+void run_interface() {
+
+	main_menu();
+	//time to clean up behind us.
+
+	Book_cleanup();
+	Customer_cleanup();
+
+	return;
+}

@@ -1,9 +1,9 @@
-
 #ifndef BOOK_MANAGEMENT_GUARD__H 
 #define BOOK_MANAGEMENT_GUARD__H
 #define LEN1 sizeof(Book)
 #define len1 sizeof(BookArray)
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /*You can extend the structs (Book and BookArray) defined in this head file;
@@ -18,13 +18,14 @@ typedef struct _Book {
 		char *authors; //comma separated list of authors
 		unsigned int year; // year of publication
 		unsigned int copies; //number of copies the library has
-		Book *next;
+		struct _Book *next;
 }Book;
-
 typedef struct _BookArray {
 	 Book* array; // pointer to array (or linked list) of struct Book.
 	 unsigned int length; // number of elements in the (Book*) array 
 }BookArray;
+static BookArray *head, *findbook;
+static Book *p1, *p2, *p3;
 //saves the database of books in the specified file
 //returns 0 if books were stored correctly, or an error code otherwise
 int store_books(FILE *file);
@@ -38,25 +39,25 @@ int add_book(Book book);
 //removes a book from the library
 //returns 0 if the book could be successfully removed, or an error code otherwise.
 int remove_book(Book book);
-//finds book with a given id.
-//returns 0 if the book could be successfully removed, or an error code otherwise.
-int find_book_by_id(unsigned int id);
 //finds books with a given title.
 //returns a BookArray structure, where the field "array" is a newly allocated array of books, or null if no book with the 
 //provided title can be found. The length of the array is also recorded in the returned structure, with 0 in case
 //array is the null pointer.
-BookArray find_book_by_title (const char *title);
+BookArray* find_book_by_title (const char *title);
 //finds books with the given authors.
 //returns a BookArray structure, where the field "array" is a newly allocated array of books, or null if no book with the 
 //provided title can be found. The length of the array is also recorded in the returned structure, with 0 in case
 //array is the null pointer.
-BookArray find_book_by_author (const char *authors);
+BookArray* find_book_by_authors (const char *authors);
 //finds books published in the given year.
 //returns a BookArray structure, where the field "array" is a newly allocated array of books, or null if no book with the 
 //provided title can be found. The length of the array is also recorded in the returned structure, with 0 in case
 //array is the null pointer.
-BookArray find_book_by_year (unsigned int year);
-Book *find_book_by_id (unsigned int id);
+BookArray* find_book_by_year (unsigned int year);
+//finds book with a given id.
+//returns 0 if the book could be successfully removed, or an error code otherwise.
+Book* find_book_by_id (unsigned int id);
+
 void _Add_book();
 void _Remove_book();
 static void _Search_for_books();
@@ -73,5 +74,5 @@ int find_the_longest_authors(Book* temp);
 void _Borrow_book();
 void _Return_book();
 void _Display_borrowing();
-void clear_BookArray()
-#endifI
+void clear_BookArray();
+#endif

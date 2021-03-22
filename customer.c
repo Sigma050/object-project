@@ -1,35 +1,79 @@
-#include <customer.h>
-#include <stdio.h>
-#include <string.h>
-static Customer *p1, *p2, *p3;
-static CustomerArray *head;
+#include "customer.h"
 int store_customer(FILE *file)
 {
-	
+	FILE *fp;
+	c2 = chead->array->next;
+	fp = fopen("file", "wb");
+	if(!fp)
+	{
+		printf("Open failed!");
+		return 1;
+	}
+	fwrite(&chead->length, sizeof(chead->length), 1, fp);
+	while(c2)
+	{
+		int leng1 = strlen(c2->account), leng2 = strlen(c2->passwords);
+		fwrite(&leng1, sizeof(leng1), 1, fp);
+		fwrite(&leng2, sizeof(leng2), 1, fp);
+		c2 = c2->next;
+	}
+	while(c2)
+	{
+		fwrite(c2->account, sizeof(c2->account), 1, fp);
+		fwrite(c2->passwords, sizeof(c2->passwords), 1, fp);
+		c2 = c2->next;
+	}
+	fclose(fp);
+	return 0;
 }
 int load_customer(FILE *file)
 {
-	
+	FILE *fp;
+	fp = fopen("file","rb");
+	if(!fp)
+	{
+		printf("Open failed!");
+		return 1;
+	}
+	chead = (CustomerArray*)malloc(len2);
+	c1 = chead->array = (Customer*)malloc(LEN2);
+	c1->next = NULL;
+	fread(&chead->length, sizeof(chead->length), 1, fp);
+	int acclen[chead->length], paslen[chead->length];
+	for(int i = 0;i < chead->length;i++) 
+	{
+		fread(&acclen[i], sizeof(acclen[i]), 1, fp);
+		fread(&paslen[i], sizeof(paslen[i]), 1, fp);
+	}
+	c1 = c1->next = (Customer*)malloc(LEN2);
+	for(int i = 0;i < chead->length;i++)
+	{
+		c1->account = (char *)malloc(acclen[i]*(sizeof(char)));
+		c1->passwords = (char *)malloc(paslen[i]*(sizeof(char)));
+		fread(c1->account, acclen[i]*(sizeof(char)), 1, fp);
+		fread(c1->passwords, paslen[i]*(sizeof(char)), 1, fp);
+		c1 = c1->next = (Customer*)malloc(LEN2);
+	}
 }
 int add_customer(Customer customer)
 {
-	if(!head)//起始开辟 
+	if(!chead)//起始开辟 
 	{
-		head = (CustomerArray*)malloc(Len2);
-		p1 = head->array = (Customer*)malloc(LEN2);
-		p1->account = (char*)malloc(9 * sizeof(char));
-		strcpy(p1->account,librarian);
-		p1->passwords = (char*)malloc(9 * sizeof(char));
-		strcpy(p1->password,librarian);
-		p1->next = NULL;
-		head->length = 1;
+		chead = (CustomerArray*)malloc(len2);
+		c1 = chead->array = (Customer*)malloc(LEN2);
+		c1->account = (char*)malloc(9 * sizeof(char));
+		strcpy(c1->account, "librarian");
+		c1->passwords = (char*)malloc(9 * sizeof(char));
+		strcpy(c1->passwords, "librarian");
+		c1->next = NULL;
+		chead->length = 1;
 	}
 	else//添加用户 
 	{
-		p1->next = &customer;
-		p1 = &customer;//要写一个判断是否开辟成功和存储的语句
-		p1->next = NULL;
-		head->length += 1;
+		c1->next = &customer;
+		c1 = &customer;//要写一个判断是否开辟成功和存储的语句
+		c1->next = NULL;
+		chead->length += 1;
 	}
 	return 0;
 }
@@ -37,57 +81,59 @@ int remove_customer(Customer customer)
 {
 	Customer *rec = &customer;
 	int flag = 0;
-	p2 = head->array;
-	p3 = p2->next;
-	while(p3)
+	c2 = chead->array;
+	c3 = c2->next;
+	while(c3)
 	{
-		if(p3 == &customer)
+		if(c3 == &customer)
 		{
-			p2->next = p3->next;
+			c2->next = c3->next;
 			free(rec);
 			flag = 1;
 		}
-		p2 = p3;
-		p3 = p3->next;
+		c2 = c3;
+		c3 = c3->next;
 	}
 	if(flag == 0)return 1;
 	if(flag == 1)return 0;
 }
 char *find_customer_by_account(char *account)
 {
-	p2 = head->array;
-	while(p2->next)
+	c2 = chead->array;
+	while(c2->next)
 	{
-		p2 = p2->next;
-		if(strcpy(p2->account, account) ==0)
+		c2 = c2->next;
+		if(strcmp(c2->account, account) ==0)
 		{
-			return(p2->password);
+			return(c2->passwords);
 		} 
 	}
 	return 0;
 }
-char *check_customer_existence(char *account)
+int check_customer_existence(char *account)
 {
-	p2 = head->array;
-	while(p2->next)
+	c2 = chead->array;
+	while(c2->next)
 	{
-		p2 = p2->next;
-		if(strcpy(p2->account, account) ==0)
+		c2 = c2->next;
+		if(strcmp(c2->account, account) ==0)
 		{
 			return 1;
 		}
 	}
 	return 0;
 }
-void clear_CustomerArray()
+void Customer_cleanup()
+
 {
-	p2 = p3 = head->array;
-	while(p2)
+	c2 = c3 = chead->array;
+	while(c2)
 	{
-		p3 = p3->next;
-		free(p2->account);
-		free(p2->passwords);
-		free(p2);
-		p2 = p3;
+		c3 = c3->next;
+		free(c2->account);
+		free(c2->passwords);
+		free(c2);
+		c2 = c3;
 	}
+	
 }

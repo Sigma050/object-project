@@ -1,33 +1,71 @@
 #include "book.h"
-#include <stdio.h>
-#include <string.h>
-static BookArray *head, *findbook;
-static Book *p1, *p2, *p3;
-int store_books(FILE *file);
+int store_books(FILE *file)
 {
 	FILE *fp;
 	p2 = head->array->next;
-	fp = fopen("file","wb");
+	fp = fopen("file", "wb");
 	if(!fp)
-		ferror("Open failed!");
+	{
+		printf("Open failed!");
 		return 1;
-	fwrite(head->length,sizeof(unsigned int),1,fp);
+	}
+	fwrite(&head->length, sizeof(head->length), 1, fp);
 	while(p2)
 	{
-		int leng1 = strlen(p2->title),leng2 = strlen(p2->authors);
-		fwrite(leng1,sizeof(int),1,fp);
-		fwrite(leng2,sizeof(int),1,fp);
+		int leng1 = strlen(p2->title), leng2 = strlen(p2->authors);
+		fwrite(&leng1, sizeof(leng1), 1, fp);
+		fwrite(&leng2, sizeof(leng2), 1, fp);
 		p2 = p2->next;
 	}
+	while(p2)
+	{
+		fwrite(&p2->id, sizeof(p2->id), 1, fp);
+		fwrite(p2->title, sizeof(p2->title), 1, fp);
+		fwrite(p2->authors, sizeof(p2->authors), 1, fp);
+		fwrite(&p2->year, sizeof(p2->year), 1, fp);
+		fwrite(&p2->copies, sizeof(p2->copies), 1, fp);
+		p2 = p2->next;
+	}
+	fclose(fp);
+	return 0;
 }
-int load_books(FILE *file);
+int load_books(FILE *file)
 {
+	FILE *fp;
+	fp = fopen("file","rb");
+	if(!fp)
+	{
+		printf("Open failed!");
+		return 1;
+	}
+	head = (BookArray*)malloc(len1);
+	p1 = head->array = (Book*)malloc(LEN1);
+	p1->next = NULL;
+	fread(&head->length, sizeof(head->length), 1, fp);
+	int titlen[head->length], autlen[head->length];
+	for(int i = 0;i < head->length;i++) 
+	{
+		fread(&titlen[i], sizeof(titlen[i]), 1, fp);
+		fread(&autlen[i], sizeof(autlen[i]), 1, fp);
+	}
+	p1 = p1->next = (Book*)malloc(LEN1);
+	for(int i = 0;i < head->length;i++)
+	{
+		p1->title = (char *)malloc(titlen[i]*(sizeof(char)));
+		p1->authors = (char *)malloc(autlen[i]*(sizeof(char)));
+		fread(&p1->id, sizeof(p1->id), 1, fp);
+		fread(p1->title, titlen[i]*(sizeof(char)), 1, fp);
+		fread(p1->authors, autlen[i]*(sizeof(char)), 1, fp);
+		fread(&p1->year, sizeof(p1->year), 1, fp);
+		fread(&p1->copies, sizeof(p1->copies), 1, fp);
+		p1 = p1->next = (Book*)malloc(LEN1);
+	}
 }
 int add_book(Book book)
 {
 	if(!head)//起始开辟 
 	{
-		head = (BookArray*)malloc(Len1);
+		head = (BookArray*)malloc(len1);
 		p1 = head->array = (Book*)malloc(LEN1);
 		p1->next = NULL;
 		head->length = 1;
@@ -41,7 +79,7 @@ int add_book(Book book)
 	}
 	return 0;
 }
-int remove_book(Book book);
+int remove_book(Book book)
 {
 	Book *re = &book;
 	int flag = 0;
@@ -61,7 +99,7 @@ int remove_book(Book book);
 	if(flag == 0)return 1;
 	if(flag == 1)return 0;
 }
-BookArray find_book_by_title (const char *title)
+BookArray* find_book_by_title (const char *title)
 { 	
 	free(findbook->array);
 	free(findbook);
@@ -83,7 +121,7 @@ BookArray find_book_by_title (const char *title)
 	}
 	return findbook;
 } 
-BookArray find_book_by_authors (const char *authors)
+BookArray* find_book_by_authors (const char *authors)
 { 
 	free(findbook->array);
 	free(findbook);
@@ -93,20 +131,10 @@ BookArray find_book_by_authors (const char *authors)
 	p2 = head->array;
 	p3 = findbook->array;
 	p3->next = NULL;
-	while (p2) 
-	{
-		while(*p2->authors != )//要写一个一个判断 
-		if (strcmp(p2->authors, authors) >= 0)
-		{
-			p3->next = p2;
-			p3 = p3->next;
-			findbook->length +=1;
-		}
-		p2 = p2->next;
-	}
+
 	return findbook;
 } 
-BookArray find_book_by_year (unsigned int year)
+BookArray* find_book_by_year (unsigned int year)
 {
 	free(findbook->array);
 	free(findbook);
@@ -128,7 +156,7 @@ BookArray find_book_by_year (unsigned int year)
 	}
 	return findbook;
 }
-Book *find_book_by_id (unsigned int id)
+Book* find_book_by_id (unsigned int id)
 {
 	p2 = head->array;
 	while(p2)
@@ -143,7 +171,7 @@ Book *find_book_by_id (unsigned int id)
 }
 void _Add_book()
 {
-	int flag1 = flag2 = flag3 = 0;  
+	int flag1 = 0, flag2 = 0, flag3 = 0;  
 	Book *temp = (Book*)malloc(LEN1);
 	printf("\nEnter the id of the book you wish to add:");
 	flag1 = scanf("%d",temp->id);
@@ -179,7 +207,7 @@ void _Remove_book()
 	}
 	else 
 	{
-		printf("Sorry, the id you entered was invalid, please try again.")
+		printf("Sorry, the id you entered was invalid, please try again.");
 		fflush(stdin);
 	}
 }
@@ -214,14 +242,14 @@ static void _Search_for_books()
 void _Display_all_books()
 {
 	if(!head)printf("Sorry, ther are no book, please wait for the librarian to add some books.");
-	else show_book_array(head);
+	else show_book_array(head->array);
 }
 void Find_book_by_id()
 {
 	unsigned int temp1; 
 	Book *temp2;
 	printf("What is the id of the book you wish to find");
-	if(scanf("%u",&temp1););
+	if(scanf("%u",&temp1))
 	{
 		if(temp2 = find_book_by_id(temp1))
 		show_book_array(temp2);// 
@@ -266,7 +294,7 @@ void Find_book_by_year()
 	unsigned int temp1; 
 	BookArray *temp2;
 	printf("What is the year of the book you wish to find");
-	if(scanf("%u",&temp1));
+	if(scanf("%u",&temp1))
 	{
 		if(temp2 = find_book_by_year(temp1))
 		show_book_array(temp2->array);
@@ -288,7 +316,6 @@ static int check_char(char* str)//判断字符串里是否有数字
 }
 char *ask_question(const char *question)
 {
-	static char *ask_question(const char *question) {
 
 	printf("%s",question);
 
@@ -306,7 +333,7 @@ char *ask_question(const char *question)
 
 		next_chunk = answer + strlen(answer); //take the new read into account
 		++iteration;
-	} while (* (next_chun -1) != '\n');
+	} while (* (next_chunk -1) != '\n');
 
 	*(next_chunk - 1) = 0; //truncate the string eliminating the new line.
 
@@ -331,8 +358,8 @@ void show_book_array(Book* boo)
 		boo = boo->next;
 		char titl[title_length + 4 - strlen(boo->title)];
 		char auth[authors_length + 4 - strlen(boo->authors)];
-		for(int j = 0;j < title_length + 4 - strlen(boo->title);i++)titl[j] = ' ';
-		for(int j = 0;j < authors_length + 4 - strlen(boo->authors);i++)auth[j] = ' ';
+		for(int j = 0;j < (title_length + 4 - strlen(boo->title));j++)titl[j] = ' ';
+		for(int j = 0;j < authors_length + 4 - strlen(boo->authors);j++)auth[j] = ' ';
 		printf("%u\t%s%s\t%s%s\t%u\t%u\n", boo->id, boo->title, titl, boo->authors, auth, boo->year, boo->copies);
 	}
 } 
@@ -368,7 +395,7 @@ void _Return_book()
 void _Display_borrowing()
 {
 }
-void clear_BookArray()
+void Book_cleanup()
 {
 	free(findbook->array);
 	free(findbook);
@@ -382,4 +409,5 @@ void clear_BookArray()
 		p2 = p3;
 	}
 }
+
 
