@@ -19,5 +19,9 @@ typedef struct _borrow_array{
 int borrow(Book book, Customer customer);
 
 Borrow *find_customer_from_borrow(Customer *customer);
+
+int check_book_existence(Book *book, Customer* customer);
+
+void _Borrow_book(char *username);
 #endif
 

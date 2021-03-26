@@ -48,14 +48,14 @@ int load_customer(FILE *file)
 	c1 = c1->next = (Customer*)malloc(LEN2);
 	for(int i = 0;i < chead->length;i++)
 	{
-		c1->account = (char *)malloc(acclen[i]*(sizeof(char)));
+		c1->account = (char *)malloc(acclen[i]*(sizeof(char))); 
 		c1->passwords = (char *)malloc(paslen[i]*(sizeof(char)));
 		fread(c1->account, acclen[i]*(sizeof(char)), 1, fp);
 		fread(c1->passwords, paslen[i]*(sizeof(char)), 1, fp);
 		c1 = c1->next = (Customer*)malloc(LEN2);
 	}
 }
-int add_customer(Customer customer)
+int add_customer(Customer* customer)
 {
 	if(!chead)//起始开辟 
 	{
@@ -65,13 +65,15 @@ int add_customer(Customer customer)
 		strcpy(c1->account, "librarian");
 		c1->passwords = (char*)malloc(9 * sizeof(char));
 		strcpy(c1->passwords, "librarian");
+		c1->next = customer;
+		c1 = customer;
 		c1->next = NULL;
 		chead->length = 1;
 	}
 	else//添加用户 
 	{
-		c1->next = &customer;
-		c1 = &customer;//要写一个判断是否开辟成功和存储的语句
+		c1->next = customer;
+		c1 = customer;//要写一个判断是否开辟成功和存储的语句
 		c1->next = NULL;
 		chead->length += 1;
 	}
@@ -100,26 +102,40 @@ int remove_customer(Customer customer)
 char *find_customer_by_account(char *account)
 {
 	c2 = chead->array;
-	while(c2->next)
+	while(c2)
 	{
-		c2 = c2->next;
 		if(strcmp(c2->account, account) ==0)
 		{
 			return(c2->passwords);
 		} 
+		c2 = c2->next;
 	}
-	return 0;
+	return NULL;
+}
+Customer *find_customer_by_name(char *name)
+{
+	c2 = chead->array;
+	while(c2)
+	{
+		if(strcmp(c2->account, name) ==0)
+		{
+			return(c2);
+		} 
+		c2 = c2->next;
+	}
+	return NULL;
 }
 int check_customer_existence(char *account)
 {
+	if(!chead)return 0;
 	c2 = chead->array;
-	while(c2->next)
+	while(c2)
 	{
-		c2 = c2->next;
 		if(strcmp(c2->account, account) ==0)
 		{
 			return 1;
 		}
+		c2 = c2->next;
 	}
 	return 0;
 }
@@ -137,3 +153,4 @@ void Customer_cleanup()
 	}
 	
 }
+

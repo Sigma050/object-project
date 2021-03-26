@@ -35,10 +35,10 @@ int store_books(FILE *file);
 int load_books(FILE *file);
 //adds a book to the ones available to the library
 //returns 0 if the book could be added, or an error code otherwise
-int add_book(Book book);
+int add_book(Book *book);
 //removes a book from the library
 //returns 0 if the book could be successfully removed, or an error code otherwise.
-int remove_book(Book book);
+int remove_book(Book *book);
 //finds books with a given title.
 //returns a BookArray structure, where the field "array" is a newly allocated array of books, or null if no book with the 
 //provided title can be found. The length of the array is also recorded in the returned structure, with 0 in case
@@ -60,7 +60,7 @@ Book* find_book_by_id (unsigned int id);
 
 void _Add_book();
 void _Remove_book();
-static void _Search_for_books();
+void _Search_for_books();
 void _Display_all_books();
 void Find_book_by_id();
 void Find_book_by_title();
@@ -74,5 +74,6 @@ int find_the_longest_authors(Book* temp);
 void _Borrow_book();
 void _Return_book();
 void _Display_borrowing();
-void clear_BookArray();
+void Book_cleanup();
+void findbook_cleanup();
 #endif

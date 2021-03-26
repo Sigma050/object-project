@@ -1,6 +1,6 @@
 [Project]
-FileName=book.dev
-Name=book
+FileName=项目1.dev
+Name=项目1
 Type=1
 Ver=2
 ObjFiles=
@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000000000000
-UnitCount=10
+UnitCount=9
 
 [VersionInfo]
 Major=1
@@ -51,15 +51,6 @@ AutoIncBuildNr=0
 SyncProduct=1
 
 [Unit1]
-FileName=未命名2
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit2]
 FileName=book.c
 CompileCpp=0
 Folder=
@@ -69,7 +60,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit3]
+[Unit2]
 FileName=book.h
 CompileCpp=0
 Folder=
@@ -79,7 +70,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit4]
+[Unit3]
 FileName=borrow.c
 CompileCpp=0
 Folder=
@@ -89,7 +80,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit5]
+[Unit4]
 FileName=borrow.h
 CompileCpp=0
 Folder=
@@ -99,7 +90,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit6]
+[Unit5]
 FileName=customer.c
 CompileCpp=0
 Folder=
@@ -109,7 +100,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit7]
+[Unit6]
 FileName=customer.h
 CompileCpp=0
 Folder=
@@ -119,7 +110,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit8]
+[Unit7]
 FileName=interface.c
 CompileCpp=0
 Folder=
@@ -129,7 +120,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit9]
+[Unit8]
 FileName=interface.h
 CompileCpp=0
 Folder=
@@ -139,7 +130,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit10]
+[Unit9]
 FileName=main.c
 CompileCpp=0
 Folder=
