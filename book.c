@@ -1,39 +1,35 @@
 #include "book.h"
 int store_books(FILE *file)
 {
-	FILE *fp;
 	p2 = head->array->next;
-	fp = fopen("file", "wb");
-	if(!fp)
+	if(!file)
 	{
 		printf("Open failed!");
 		return 1;
 	}
-	fwrite(&head->length, sizeof(head->length), 1, fp);
+	fwrite(&head->length, sizeof(head->length), 1, file);
 	while(p2)
 	{
 		int leng1 = strlen(p2->title), leng2 = strlen(p2->authors);
-		fwrite(&leng1, sizeof(leng1), 1, fp);
-		fwrite(&leng2, sizeof(leng2), 1, fp);
+		fwrite(&leng1, sizeof(leng1), 1, file);
+		fwrite(&leng2, sizeof(leng2), 1, file);
 		p2 = p2->next;
 	}
 	while(p2)
 	{
-		fwrite(&p2->id, sizeof(p2->id), 1, fp);
-		fwrite(p2->title, sizeof(p2->title), 1, fp);
-		fwrite(p2->authors, sizeof(p2->authors), 1, fp);
-		fwrite(&p2->year, sizeof(p2->year), 1, fp);
-		fwrite(&p2->copies, sizeof(p2->copies), 1, fp);
+		fwrite(&p2->id, sizeof(p2->id), 1, file);
+		fwrite(p2->title, sizeof(p2->title), 1, file);
+		fwrite(p2->authors, sizeof(p2->authors), 1, file);
+		fwrite(&p2->year, sizeof(p2->year), 1, file);
+		fwrite(&p2->copies, sizeof(p2->copies), 1, file);
 		p2 = p2->next;
 	}
-	fclose(fp);
+	fclose(file);
 	return 0;
 }
 int load_books(FILE *file)
 {
-	FILE *fp;
-	fp = fopen("file","rb");
-	if(!fp)
+	if(!file)
 	{
 		printf("Open failed!");
 		return 1;
@@ -41,25 +37,25 @@ int load_books(FILE *file)
 	head = (BookArray*)malloc(len1);
 	p1 = head->array = (Book*)malloc(LEN1);
 	p1->next = NULL;
-	fread(&head->length, sizeof(head->length), 1, fp);
+	fread(&head->length, sizeof(head->length), 1, file);
 	int titlen[head->length], autlen[head->length];
 	for(int i = 0;i < (head->length);i++) 
 	{
-		fread(&titlen[i], sizeof(titlen[i]), 1, fp);
-		fread(&autlen[i], sizeof(autlen[i]), 1, fp);
+		fread(&titlen[i], sizeof(titlen[i]), 1, file);
+		fread(&autlen[i], sizeof(autlen[i]), 1, file);
 	}
-	p1 = p1->next = (Book*)malloc(LEN1);
 	for(int i = 0;i < head->length;i++)
 	{
+		p1 = p1->next = (Book*)malloc(LEN1);
 		p1->title = (char *)malloc(titlen[i]*(sizeof(char)));
 		p1->authors = (char *)malloc(autlen[i]*(sizeof(char)));
-		fread(&p1->id, sizeof(p1->id), 1, fp);
-		fread(p1->title, titlen[i]*(sizeof(char)), 1, fp);
-		fread(p1->authors, autlen[i]*(sizeof(char)), 1, fp);
-		fread(&p1->year, sizeof(p1->year), 1, fp);
-		fread(&p1->copies, sizeof(p1->copies), 1, fp);
-		p1 = p1->next = (Book*)malloc(LEN1);
+		fread(&p1->id, sizeof(p1->id), 1, file);
+		fread(p1->title, titlen[i]*(sizeof(char)), 1, file);
+		fread(p1->authors, autlen[i]*(sizeof(char)), 1, file);
+		fread(&p1->year, sizeof(p1->year), 1, file);
+		fread(&p1->copies, sizeof(p1->copies), 1, file);
 	}
+	return 0;
 }
 int add_book(Book* book)
 {
@@ -439,6 +435,7 @@ void Book_cleanup()
 		free(p2);
 		p2 = p3;
 	}
+	free(head);
 }
 void findbook_cleanup()
 {
@@ -451,4 +448,5 @@ void findbook_cleanup()
 		free(p2);
 		p2 = p3;
 	}
+	free(findbook);
 }

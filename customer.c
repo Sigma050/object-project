@@ -1,36 +1,32 @@
 #include "customer.h"
 int store_customer(FILE *file)
 {
-	FILE *fp;
 	c2 = chead->array->next;
-	fp = fopen("file", "wb");
-	if(!fp)
+	if(!file)
 	{
 		printf("Open failed!");
 		return 1;
 	}
-	fwrite(&chead->length, sizeof(chead->length), 1, fp);
+	fwrite(&chead->length, sizeof(chead->length), 1, file);
 	while(c2)
 	{
 		int leng1 = strlen(c2->account), leng2 = strlen(c2->passwords);
-		fwrite(&leng1, sizeof(leng1), 1, fp);
-		fwrite(&leng2, sizeof(leng2), 1, fp);
+		fwrite(&leng1, sizeof(leng1), 1, file);
+		fwrite(&leng2, sizeof(leng2), 1, file);
 		c2 = c2->next;
 	}
 	while(c2)
 	{
-		fwrite(c2->account, sizeof(c2->account), 1, fp);
-		fwrite(c2->passwords, sizeof(c2->passwords), 1, fp);
+		fwrite(c2->account, sizeof(c2->account), 1, file);
+		fwrite(c2->passwords, sizeof(c2->passwords), 1, file);
 		c2 = c2->next;
 	}
-	fclose(fp);
+	fclose(file);
 	return 0;
 }
 int load_customer(FILE *file)
 {
-	FILE *fp;
-	fp = fopen("file","rb");
-	if(!fp)
+	if(!file)
 	{
 		printf("Open failed!");
 		return 1;
@@ -38,20 +34,20 @@ int load_customer(FILE *file)
 	chead = (CustomerArray*)malloc(len2);
 	c1 = chead->array = (Customer*)malloc(LEN2);
 	c1->next = NULL;
-	fread(&chead->length, sizeof(chead->length), 1, fp);
+	fread(&chead->length, sizeof(chead->length), 1, file);
 	int acclen[chead->length], paslen[chead->length];
 	for(int i = 0;i < chead->length;i++) 
 	{
-		fread(&acclen[i], sizeof(acclen[i]), 1, fp);
-		fread(&paslen[i], sizeof(paslen[i]), 1, fp);
+		fread(&acclen[i], sizeof(acclen[i]), 1, file);
+		fread(&paslen[i], sizeof(paslen[i]), 1, file);
 	}
 	c1 = c1->next = (Customer*)malloc(LEN2);
 	for(int i = 0;i < chead->length;i++)
 	{
 		c1->account = (char *)malloc(acclen[i]*(sizeof(char))); 
 		c1->passwords = (char *)malloc(paslen[i]*(sizeof(char)));
-		fread(c1->account, acclen[i]*(sizeof(char)), 1, fp);
-		fread(c1->passwords, paslen[i]*(sizeof(char)), 1, fp);
+		fread(c1->account, acclen[i]*(sizeof(char)), 1, file);
+		fread(c1->passwords, paslen[i]*(sizeof(char)), 1, file);
 		c1 = c1->next = (Customer*)malloc(LEN2);
 	}
 }

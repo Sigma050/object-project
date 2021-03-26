@@ -10,7 +10,7 @@ extern Customer *c1;
 extern CustomerArray *chead;
 static void main_menu()
 {
-	int choice = 5;
+	int choice = 7;
 	do
 	{
 		char *answer = ask_question("Please choose an option:\n1) Register an account\n2) Login\n3) Search for books\n4) Display all books\n5) Quit\n");
@@ -31,12 +31,19 @@ static void main_menu()
 				_Display_all_books(); 
 				break;
 			case 5:
+				load();
+				break;
+			case 6:
+				save();
+				break;
+			case 7:
 				printf("Good bye");
 				break;
+	
 			default:
 				printf("Sorry, the option you entered was invalid, please try again.");
 		}
-	}while(choice != 5);
+	}while(choice != 7);
 }
 static void _Register_an_account()
 {
@@ -137,7 +144,7 @@ static void customer_interface(char *username)
 				_Display_all_books();
 				break;
 			case 5:
-				_Display_borrowing();
+				_Display_borrowing(username);
 			case 6:
 				break;
 			default:
@@ -153,6 +160,25 @@ void run_interface() {
 	findbook_cleanup();
 	Book_cleanup();
 	Customer_cleanup();
+	Borrow_cleanup();
 
 	return;
+}
+void load()
+{
+	FILE *fp1, *fp2, *fp3;
+	fp1 = fopen("booksma", "wb");
+	fp2 = fopen("customerma", "wb");
+	fp3 = fopen("borrowma", "wb");
+	if(load_books(fp1) == 0 && load_customer(fp2) == 0 && load_borrow(fp3) == 0);
+	printf("Load successfully");
+}
+void save()
+{
+	FILE *fp1, *fp2, *fp3;
+	fp1 = fopen("booksma","rb");
+	fp2 = fopen("customerma","rb");
+	fp3 = fopen("borrowma","rb");
+	if(store_books(fp1) == 0 && store_customer(fp2) == 0 && store_borrow(fp3) == 0);
+	printf("Save successfully");
 }

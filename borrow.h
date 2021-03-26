@@ -9,19 +9,31 @@
 #define len3 sizeof(BorrowArray)
 typedef struct _borrow{
 	BookArray *bookarray;
-	Customer *customer;
+	char *cc;
 	struct _borrow *next;
 }Borrow;
 typedef struct _borrow_array{
 	Borrow *array;
 	unsigned int length;
 }BorrowArray;
-int borrow(Book book, Customer customer);
+int store_borrow(FILE *file);
 
-Borrow *find_customer_from_borrow(Customer *customer);
+int load_borrow(FILE *file);
 
-int check_book_existence(Book *book, Customer* customer);
+int borrow_add(Book *book, char *cc);
+
+int borrow_remove(unsigned int id, char *cc);
+
+Borrow *find_customer_from_borrow(char *cc);
+
+int check_book_existence(Book *book, char *cc);
 
 void _Borrow_book(char *username);
+
+void _Return_book(char *username);
+
+void _Display_borrowing(char *name);
+
+void Borrow_cleanup();
 #endif
 
