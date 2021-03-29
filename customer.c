@@ -1,12 +1,7 @@
 #include "customer.h"
 int store_customer(FILE *file)
 {
-	c2 = chead->array->next;
-	if(!file)
-	{
-		printf("Open failed!");
-		return 1;
-	}
+	c2 = chead->array;
 	fwrite(&chead->length, sizeof(chead->length), 1, file);
 	while(c2)
 	{
@@ -26,11 +21,6 @@ int store_customer(FILE *file)
 }
 int load_customer(FILE *file)
 {
-	if(!file)
-	{
-		printf("Open failed!");
-		return 1;
-	}
 	chead = (CustomerArray*)malloc(len2);
 	c1 = chead->array = (Customer*)malloc(LEN2);
 	c1->next = NULL;
@@ -50,6 +40,8 @@ int load_customer(FILE *file)
 		fread(c1->passwords, paslen[i]*(sizeof(char)), 1, file);
 		c1 = c1->next = (Customer*)malloc(LEN2);
 	}
+	fclose(file);
+	return 0;
 }
 int add_customer(Customer* customer)
 {

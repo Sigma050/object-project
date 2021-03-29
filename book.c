@@ -1,12 +1,8 @@
 #include "book.h"
+#include "interface.h"
 int store_books(FILE *file)
 {
 	p2 = head->array->next;
-	if(!file)
-	{
-		printf("Open failed!");
-		return 1;
-	}
 	fwrite(&head->length, sizeof(head->length), 1, file);
 	while(p2)
 	{
@@ -29,11 +25,6 @@ int store_books(FILE *file)
 }
 int load_books(FILE *file)
 {
-	if(!file)
-	{
-		printf("Open failed!");
-		return 1;
-	}
 	head = (BookArray*)malloc(len1);
 	p1 = head->array = (Book*)malloc(LEN1);
 	p1->next = NULL;
@@ -55,6 +46,7 @@ int load_books(FILE *file)
 		fread(&p1->year, sizeof(p1->year), 1, file);
 		fread(&p1->copies, sizeof(p1->copies), 1, file);
 	}
+	fclose(file);
 	return 0;
 }
 int add_book(Book* book)
@@ -69,7 +61,7 @@ int add_book(Book* book)
 	}
 	else//添加书 
 	{
-		if(!find_book_by_id (book->id))return 1;
+		if(find_book_by_id (book->id))return 1;
 		p1->next = book;
 		p1 = book;//要写一个判断是否开辟成功和存储的语句 
 		p1->next = NULL;
@@ -101,12 +93,10 @@ int remove_book(Book* book)
 }
 BookArray* find_book_by_title (const char *title)
 { 	
-	findbook_cleanup();
 	findbook = (BookArray*)malloc(len1);
-	findbook->array = (Book*)malloc(LEN1);
+	p3 = findbook->array = (Book*)malloc(LEN1);
 	findbook->length = 0;
-	p2 = head->array;
-	p3 = findbook->array;
+	p2 = head->array->next;
 	p3->next = NULL;
 	while (p2)
 	{
@@ -127,12 +117,10 @@ BookArray* find_book_by_title (const char *title)
 } 
 BookArray* find_book_by_authors (const char *authors)
 { 
-	findbook_cleanup();
 	findbook = (BookArray*)malloc(len1);
-	findbook->array = (Book*)malloc(LEN1);
+	p3 = findbook->array = (Book*)malloc(LEN1);
 	findbook->length = 0;
-	p2 = head->array;
-	p3 = findbook->array;
+	p2 = head->array->next;
 	p3->next = NULL;
 	while (p2)
 	{
@@ -153,12 +141,10 @@ BookArray* find_book_by_authors (const char *authors)
 } 
 BookArray* find_book_by_year (unsigned int year)
 {
-	findbook_cleanup();
 	findbook = (BookArray*)malloc(len1);
-	findbook->array = (Book*)malloc(LEN1);
+	p3 = findbook->array = (Book*)malloc(LEN1);
 	findbook->length = 0;
-	p2 = head->array;
-	p3 = findbook->array;
+	p2 = head->array->next;
 	p3->next = NULL;
 	while (p2) 
 	{
@@ -178,7 +164,7 @@ BookArray* find_book_by_year (unsigned int year)
 	return findbook;
 }
 Book* find_book_by_id (unsigned int id)
-{
+{ 
 	p2 = head->array;
 	while(p2)
 	{
@@ -294,10 +280,12 @@ void Find_book_by_title()
 	}
 	else 
 	{
-		if((temp2 = find_book_by_title(temp1))->length)
+		temp2 = find_book_by_title(temp1);
+		if(temp2->length)
 		show_book_array(temp2->array->next);
 		else printf("Sorry, this book can not be founded.");
 	}
+	findbook_cleanup();
 	free(temp1);
 }
 void Find_book_by_authors()
@@ -310,10 +298,12 @@ void Find_book_by_authors()
 	}
 	else 
 	{
-		if(temp2 = find_book_by_authors(temp1))
+		temp2 = find_book_by_authors(temp1); 
+		if(temp2->length)
 		show_book_array(temp2->array->next);
 		else printf("Sorry, this book can not be founded.");
 	}
+	findbook_cleanup();
 	free(temp1);
 }
 void Find_book_by_year()
@@ -324,11 +314,12 @@ void Find_book_by_year()
 	if(scanf("%u",&temp1))
 	{
 		getchar();
-		if(temp2 = find_book_by_year(temp1))
-		show_book_array(temp2->array);
+		temp2 = find_book_by_year(temp1);
+		if(temp2->length)show_book_array(temp2->array->next);
 		else printf("Sorry, this book can not be founded.");
 	}
 	else printf("\nSorry, the id you entered was invalid, please try again.");
+	findbook_cleanup();
 	fflush(stdin);
 }
 static int check_char(char* str)//判断字符串里是否有数字 
@@ -430,8 +421,10 @@ void Book_cleanup()
 	while(p2)
 	{
 		p3 = p3->next; 
-		free(p2->authors);
+		if(p2->title);
 		free(p2->title);
+		if(p2->authors)
+		free(p2->authors);
 		free(p2);
 		p2 = p3;
 	}
@@ -442,11 +435,8 @@ void findbook_cleanup()
 	p2 = p3 = findbook->array;
 	while(p2)
 	{
-		p3 = p3->next; 
-		free(p2->authors);
-		free(p2->title);
+		p3 = p3->next;
 		free(p2);
 		p2 = p3;
 	}
-	free(findbook);
 }

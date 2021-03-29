@@ -39,7 +39,6 @@ static void main_menu()
 			case 7:
 				printf("Good bye");
 				break;
-	
 			default:
 				printf("Sorry, the option you entered was invalid, please try again.");
 		}
@@ -167,18 +166,18 @@ void run_interface() {
 void load()
 {
 	FILE *fp1, *fp2, *fp3;
-	fp1 = fopen("booksma", "wb");
-	fp2 = fopen("customerma", "wb");
-	fp3 = fopen("borrowma", "wb");
+	fp1 = fopen("booksma", "rb");
+	fp2 = fopen("customerma", "rb");
+	fp3 = fopen("borrowma", "rb");
 	if(load_books(fp1) == 0 && load_customer(fp2) == 0 && load_borrow(fp3) == 0);
 	printf("Load successfully");
 }
 void save()
 {
 	FILE *fp1, *fp2, *fp3;
-	fp1 = fopen("booksma","rb");
-	fp2 = fopen("customerma","rb");
-	fp3 = fopen("borrowma","rb");
+	fp1 = fopen("booksma","wb");
+	fp2 = fopen("customerma","wb");
+	fp3 = fopen("borrowma","wb");
 	if(store_books(fp1) == 0 && store_customer(fp2) == 0 && store_borrow(fp3) == 0);
 	printf("Save successfully");
 }

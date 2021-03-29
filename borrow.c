@@ -6,11 +6,6 @@ static Book *b4, *b5, *re;
 int store_borrow(FILE *file)
 {
 	b2 = bhead->array->next;
-	if(!file)
-	{
-		printf("Open failed!");
-		return 1;
-	}
 	fwrite(&bhead->length, sizeof(bhead->length), 1, file);
 	while(b2)
 	{
@@ -37,15 +32,11 @@ int store_borrow(FILE *file)
 		fwrite(b2->cc, sizeof(b2->cc), 1 ,file);
 		b2 = b2->next; 
 	}
+	fclose(file);
 	return 0;
 }
 int load_borrow(FILE *file)
 {
-	if(!file)
-	{
-		printf("Open failed!");
-		return 1;
-	}
 	bhead = (BorrowArray*)malloc(len3);
 	b1 = bhead->array = (Borrow*)malloc(LEN3);
 	b1->next = NULL;
@@ -79,6 +70,7 @@ int load_borrow(FILE *file)
 		b1->cc = (char*)malloc(le*sizeof(char));
 		fread(b1->cc, le*sizeof(char), 1, file);
 	}
+	fclose(file);
 	return 0;
 }
 int borrow_add(Book *book, char *cc)
@@ -191,7 +183,7 @@ void _Borrow_book(char *username)
 	printf("What is the id of the book you wish to borrow?");
 	check = scanf("%u",&ii);
 	getchar();
-	if(check)
+	if(!check)
 	{
 		printf("Sorry, you should enter correct id.");
 		fflush(stdin);
