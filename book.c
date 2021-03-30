@@ -2,22 +2,28 @@
 #include "interface.h"
 int store_books(FILE *file)
 {
+	if(file == NULL)
+	{
+		printf("Open file failed");
+		return 1;
+	}
 	p2 = head->array->next;
-	fwrite(&head->length, sizeof(head->length), 1, file);
+	fwrite(&(head->length), sizeof(head->length), 1, file);
 	while(p2)
 	{
 		int leng1 = strlen(p2->title), leng2 = strlen(p2->authors);
-		fwrite(&leng1, sizeof(leng1), 1, file);
-		fwrite(&leng2, sizeof(leng2), 1, file);
+		fwrite(&leng1, sizeof(int), 1, file);
+		fwrite(&leng2, sizeof(int), 1, file);
 		p2 = p2->next;
 	}
+	p2 = head->array->next;
 	while(p2)
 	{
-		fwrite(&p2->id, sizeof(p2->id), 1, file);
-		fwrite(p2->title, sizeof(p2->title), 1, file);
-		fwrite(p2->authors, sizeof(p2->authors), 1, file);
-		fwrite(&p2->year, sizeof(p2->year), 1, file);
-		fwrite(&p2->copies, sizeof(p2->copies), 1, file);
+		fwrite(&(p2->id), sizeof(p2->id), 1, file);
+		fwrite(p2->title, strlen(p2->title)+1, 1, file);
+		fwrite(p2->authors, strlen(p2->authors)+1, 1, file);
+		fwrite(&(p2->year), sizeof(p2->year), 1, file);
+		fwrite(&(p2->copies), sizeof(p2->copies), 1, file);
 		p2 = p2->next;
 	}
 	fclose(file);
@@ -25,6 +31,11 @@ int store_books(FILE *file)
 }
 int load_books(FILE *file)
 {
+	if(file == NULL)
+	{
+		printf("Open file failed");
+		return 1;
+	}
 	head = (BookArray*)malloc(len1);
 	p1 = head->array = (Book*)malloc(LEN1);
 	p1->next = NULL;
@@ -32,19 +43,20 @@ int load_books(FILE *file)
 	int titlen[head->length], autlen[head->length];
 	for(int i = 0;i < (head->length);i++) 
 	{
-		fread(&titlen[i], sizeof(titlen[i]), 1, file);
-		fread(&autlen[i], sizeof(autlen[i]), 1, file);
+		fread(&titlen[i], sizeof(int), 1, file);
+		fread(&autlen[i], sizeof(int), 1, file);
 	}
 	for(int i = 0;i < head->length;i++)
 	{
 		p1 = p1->next = (Book*)malloc(LEN1);
-		p1->title = (char *)malloc(titlen[i]*(sizeof(char)));
-		p1->authors = (char *)malloc(autlen[i]*(sizeof(char)));
+		p1->title = (char *)malloc(titlen[i] + 1);
+		p1->authors = (char *)malloc(autlen[i] + 1);
 		fread(&p1->id, sizeof(p1->id), 1, file);
-		fread(p1->title, titlen[i]*(sizeof(char)), 1, file);
-		fread(p1->authors, autlen[i]*(sizeof(char)), 1, file);
+		fread(p1->title, titlen[i]+1, 1, file);
+		fread(p1->authors, autlen[i]+1, 1, file);
 		fread(&p1->year, sizeof(p1->year), 1, file);
 		fread(&p1->copies, sizeof(p1->copies), 1, file);
+		p1->next = NULL; 
 	}
 	fclose(file);
 	return 0;
@@ -62,8 +74,7 @@ int add_book(Book* book)
 	else//添加书 
 	{
 		if(find_book_by_id (book->id))return 1;
-		p1->next = book;
-		p1 = book;//要写一个判断是否开辟成功和存储的语句 
+		p1 = p1->next = book;//要写一个判断是否开辟成功和存储的语句 
 		p1->next = NULL;
 		head->length += 1;
 	}
@@ -79,6 +90,7 @@ int remove_book(Book* book)
 	{
 		if(p3 == re)
 		{
+			if(re->next == NULL)p1 = p2;
 			p2->next = p3->next;
 			free(re->title);
 			free(re->authors);
@@ -257,14 +269,37 @@ void _Display_all_books()
 }
 void Find_book_by_id()
 {
-	unsigned int temp1; 
-	Book *temp2;
+	unsigned int temp3; 
+	Book *temp4;
 	printf("What is the id of the book you wish to find");
-	if(scanf("%u",&temp1))
+	if(scanf("%u",&temp3))
 	{
 		getchar();
-		if(temp2 = find_book_by_id(temp1))
-		show_book_array(temp2);// 
+		if(temp4 = find_book_by_id(temp3))
+		{
+			int times = 1, temp1, temp2;
+			temp1 = strlen(temp4->title);
+			temp2 = strlen(temp4->authors);
+			while(temp1 - 8 >= 0)
+			{
+				temp1 -= 8;
+				times += 1;
+			}
+			temp1 = times;
+			times = 1;
+			while(temp2 - 8 >= 0)
+			{
+				temp2 -= 8;
+				times +=1;
+			}
+			temp2 = times;
+			printf("Id\tTitle");
+			for(int i = 0; i<temp1;i++)printf("\t");
+			printf("Authors");
+			for(int i = 0; i<temp2; i++)printf("\t");
+			printf("Year\tCopies\n");
+			printf("%u\t%s\t%s\t%u\t%u\n", temp4->id, temp4->title, temp4->authors, temp4->year, temp4->copies);
+		}// 
 		else printf("Sorry, this book can not be founded.");
 	}
 	else printf("\nSorry, the id you entered was invalid, please try again.");
@@ -361,22 +396,22 @@ char *ask_question(const char *question)
 }
 void show_book_array(Book* boo)
 {
-	int title_length, authors_length, times = 0;
+	int title_length, authors_length, times = 1, temp1, temp2;
 	title_length = find_the_longest_title(boo);
 	authors_length = find_the_longest_authors(boo);
-	while((title_length % 8) >= 0)
+	while((title_length - 8) >= 0)
 	{
 		title_length -= 8;
 		times += 1;
 	}
-	title_length = times + 1;
-	times = 0;
-	while((authors_length % 8) >= 0)
+	title_length = times;
+	times = 1;
+	while((authors_length - 8) >= 0)
 	{
 		authors_length -= 8;
 		times += 1;
 	}
-	authors_length = times + 1;
+	authors_length = times;
 	printf("Id\tTitle");
 	for(int i = 0; i<title_length; i++)printf("\t");
 	printf("Authors");
@@ -384,10 +419,26 @@ void show_book_array(Book* boo)
 	printf("Year\tCopies\n");
 	while(boo)
 	{
+		times = 0;
+		temp1 = strlen(boo->title);
+		temp2 = strlen(boo->authors);
+		while(temp1 - 8 >= 0)
+		{
+			temp1 -= 8;
+			times += 1;
+		}
+		temp1 = times;
+		times = 0;
+		while(temp2 - 8 >= 0)
+		{
+			temp2 -= 8;
+			times +=1;
+		}
+		temp2 = times;
 		printf("%u\t%s",boo->id,boo->title);
-		for(int i = 0; i<title_length; i++)printf("\t");
+		for(int i = 0; i<title_length - temp1; i++)printf("\t");
 		printf("%s",boo->authors);
-		for(int i = 0; i<authors_length; i++)printf("\t");
+		for(int i = 0; i<authors_length - temp2; i++)printf("\t");
 		printf("%u\t%u\n",boo->year,boo->copies);
 		boo = boo->next;
 	}
@@ -399,7 +450,7 @@ int find_the_longest_title(Book* temp)
 	p2 = temp;
 	while(p2)
 	{
-		max = strlen(p2->title) > max?strlen(p2->title):max;
+		max = strlen(p2->title) >= max?strlen(p2->title):max;
 		p2 = p2->next;
 	}
 	return max;
@@ -410,33 +461,43 @@ int find_the_longest_authors(Book* temp)
 	p2 = temp;
 	while(p2)
 	{
-		max = strlen(p2->authors) > max?strlen(p2->authors):max;
+		max = strlen(p2->authors) >= max?strlen(p2->authors):max;
 		p2 = p2->next;
 	}
 	return max;
 }
 void Book_cleanup()
 {
-	p2 = p3 = head->array;
-	while(p2)
+	if(head->array)
 	{
-		p3 = p3->next; 
-		if(p2->title);
-		free(p2->title);
-		if(p2->authors)
-		free(p2->authors);
-		free(p2);
-		p2 = p3;
+		p2 = p3 = head->array;
+		while(p2)
+		{
+			p3 = p3->next; 
+			if(p2->title);
+			free(p2->title);
+			if(p2->authors)
+			free(p2->authors);
+			free(p2);
+			p2 = p3;
+		}
+		free(head);
+		head = NULL;
+		p1 = p2 = p3 = NULL;
 	}
-	free(head);
 }
 void findbook_cleanup()
 {
-	p2 = p3 = findbook->array;
-	while(p2)
+	if(findbook->array)
 	{
-		p3 = p3->next;
-		free(p2);
-		p2 = p3;
+		p2 = p3 = findbook->array;
+		while(p2)
+		{
+			p3 = p3->next;
+			free(p2);
+			p2 = p3;
+		}
+		free(findbook);
+		findbook = NULL;
 	}
 }

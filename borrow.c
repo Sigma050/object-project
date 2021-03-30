@@ -5,35 +5,39 @@ static Borrow *b1, *b2, *b3;
 static Book *b4, *b5, *re;
 int store_borrow(FILE *file)
 {
-	b2 = bhead->array->next;
-	fwrite(&bhead->length, sizeof(bhead->length), 1, file);
-	while(b2)
+	if(bhead)
 	{
-		fwrite(&b2->bookarray->length, sizeof(b2->bookarray->length), 1, file);
-		b4 = b2->bookarray->array->next;
-		while(b4)
+		b2 = bhead->array->next;
+		fwrite(&bhead->length, sizeof(bhead->length), 1, file);
+		while(b2)
 		{
-			int leng1 = strlen(b4->title), leng2 = strlen(b4->authors);
-			fwrite(&leng1, sizeof(leng1), 1, file);
-			fwrite(&leng2, sizeof(leng2), 1, file);
-			b4 = b4->next;
-		}
-		while(b4)
-		{
-			fwrite(&b4->id, sizeof(b4->id), 1, file);
-			fwrite(b4->title, sizeof(b4->title), 1, file);
-			fwrite(b4->authors, sizeof(b4->authors), 1, file);
-			fwrite(&b4->year, sizeof(b4->year), 1, file);
-			fwrite(&b4->copies, sizeof(b4->copies), 1, file);
-			b4 = b4->next;
-		}
-		int leng3 = strlen(b2->cc);
-		fwrite(&leng3, sizeof(leng3), 1, file);
-		fwrite(b2->cc, sizeof(b2->cc), 1 ,file);
-		b2 = b2->next; 
+			fwrite(&b2->bookarray->length, sizeof(b2->bookarray->length), 1, file);
+			b4 = b2->bookarray->array->next;
+			while(b4)
+			{
+				int leng1 = strlen(b4->title), leng2 = strlen(b4->authors);
+				fwrite(&leng1, sizeof(leng1), 1, file);
+				fwrite(&leng2, sizeof(leng2), 1, file);
+				b4 = b4->next;
+			}
+			b4 = b2->bookarray->array->next;
+			while(b4)
+			{
+				fwrite(&b4->id, sizeof(b4->id), 1, file);
+				fwrite(b4->title, strlen(b4->title) + 1, 1, file);
+				fwrite(b4->authors, strlen(b4->authors) + 1, 1, file);
+				fwrite(&b4->year, sizeof(b4->year), 1, file);
+				fwrite(&b4->copies, sizeof(b4->copies), 1, file);
+				b4 = b4->next;
+			}
+			int leng3 = strlen(b2->cc);
+			fwrite(&leng3, sizeof(leng3), 1, file);
+			fwrite(b2->cc, sizeof(b2->cc), 1 ,file);
+			b2 = b2->next; 
+		}	
 	}
-	fclose(file);
-	return 0;
+		fclose(file);
+		return 0;
 }
 int load_borrow(FILE *file)
 {
@@ -61,14 +65,14 @@ int load_borrow(FILE *file)
 			b4->title = (char *)malloc(titlen[j]*(sizeof(char)));
 			b4->authors = (char *)malloc(autlen[j]*(sizeof(char)));
 			fread(&b4->id, sizeof(p1->id), 1, file);
-			fread(b4->title, titlen[j]*(sizeof(char)), 1, file);
-			fread(b4->authors, autlen[j]*(sizeof(char)), 1, file);
+			fread(b4->title, titlen[j] + 1, 1, file);
+			fread(b4->authors, autlen[j] + 1, 1, file);
 			fread(&b4->year, sizeof(b4->year), 1, file);
 			fread(&b4->copies, sizeof(b4->copies), 1, file);
 		}
 		fread(&le, sizeof(le), 1, file);
-		b1->cc = (char*)malloc(le*sizeof(char));
-		fread(b1->cc, le*sizeof(char), 1, file);
+		b1->cc = (char*)malloc(le + 1);
+		fread(b1->cc, le + 1, 1, file);
 	}
 	fclose(file);
 	return 0;
@@ -96,13 +100,14 @@ int borrow_add(Book *book, char *cc)
 		b4->copies = book->copies;
 		b4->next = NULL;
 		b2->bookarray->length +=1;
+		book->copies -= 1;
 	}  
 	else
 	{
 		b1 = b1->next = (Borrow*)malloc(LEN3);
 		b1->next = NULL;
 		b1->bookarray = (BookArray*)malloc(len1);
-		b1->cc = (char*)malloc((strlen(cc)+1)*sizeof(char));
+		b1->cc = (char*)malloc((strlen(cc))*sizeof(char));
 		strcpy(b1->cc,cc);
 		b4 = b1->bookarray->array = (Book*)malloc(LEN1);
 		b4 = b4->next = (Book*)malloc(LEN1);
@@ -113,6 +118,7 @@ int borrow_add(Book *book, char *cc)
 		b4->copies = book->copies;
 		b4->next = NULL;
 		b1->bookarray->length = 1;
+		book->copies -= 1;
 		bhead->length += 1;
 	}
 	return 1;
@@ -134,10 +140,9 @@ int borrow_remove(unsigned int id, char *cc)
 				b4 = b4->next;
 				if(b4->id == id)
 				{
+					b4->copies += 1;
 					flag = 2;
 					re->next = b4->next;
-					free(b4->title);
-					free(b4->authors);
 					free(b4);
 					b2->bookarray->length -= 1;
 				}
@@ -202,7 +207,7 @@ void _Return_book(char *username)
 	printf("What is the id of the book you wish to return?");
 	check = scanf("%u",&ii);
 	getchar();
-	if(check)
+	if(!check)
 	{
 		printf("Sorry, you should enter correct id.");
 		fflush(stdin);
@@ -210,7 +215,10 @@ void _Return_book(char *username)
 	else if(!find_book_by_id(ii))printf("There is no such id book.");
 	else 
 	{ 
-		if((bb = borrow_remove(ii, username)) == 2)printf("Successfully returned.");
+		if((bb = borrow_remove(ii, username)) == 2)
+		{
+			printf("Successfully returned.");
+		}
 		if(bb == 1)printf("You may not have borrowed books.");
 		if(!bb) printf("Sorry, you have not borrrowed books.");
 	} 
@@ -222,34 +230,50 @@ void _Display_borrowing(char *name)
 	{
 		if(strcmp(b2->cc, name) == 0)
 		{
-			int title_length, authors_length, times = 0;
+			int title_length, authors_length, times = 1, temp1, temp2;
 			title_length = find_the_longest_title(b4 = b2->bookarray->array->next);
 			authors_length = find_the_longest_authors(b4);
-			while((title_length % 8) >= 0)
+			while((title_length - 8) >= 0)
 			{
 				title_length -= 8;
 				times += 1;
 			}
-			title_length = times + 1;
-			times = 0;
-			while((authors_length % 8) >= 0)
+			title_length = times;
+			times = 1;
+			while((authors_length - 8) >= 0)
 			{
 				authors_length -= 8;
 				times += 1;
 			}
-			authors_length = times + 1;
+			authors_length = times;
+			times = 0;
 			printf("Id\tTitle");
 			for(int i = 0; i<title_length; i++)printf("\t");
 			printf("Authors");
 			for(int i = 0; i<authors_length; i++)printf("\t");
-			printf("Year\tCopies\n");
+			printf("Year\n");
 			while(b4)
 			{
+				temp1 = strlen(b4->title);
+				temp2 = strlen(b4->authors);
+				while(temp1 - 8 >= 0)
+				{
+					temp1 -= 8;
+					times += 1;
+				}
+				temp1 = times;
+				times = 0;
+				while(temp2 - 8 >= 0)
+				{
+					temp2 -= 8;
+					times +=1;
+				}
+				temp2 = times;
 				printf("%u\t%s", b4->id, b4->title);
-				for(int i = 0; i<title_length; i++)printf("\t");
+				for(int i = 0; i<title_length - temp1; i++)printf("\t");
 				printf("%s",b4->authors);
-				for(int i = 0; i<authors_length; i++)printf("\t");
-				printf("%u\t%u\n",b4->year,b4->copies);
+				for(int i = 0; i<authors_length - temp2; i++)printf("\t");
+				printf("%u\n",b4->year);
 				b4 = b4->next;
 			}	
 		}
@@ -258,23 +282,26 @@ void _Display_borrowing(char *name)
 }
 void Borrow_cleanup()
 {
-	b2 = b3 = bhead->array;
-	while(b2)
+	if(bhead)
 	{
-		b3 = b3->next;
-		b4 = b5 = b2->bookarray->array;
-		while(b4)
+		b2 = b3 = bhead->array;
+		while(b2)
 		{
-			b5 = b5->next;
-			free(b4->authors);
-			free(b4->title);
-			free(b4);
-			b4 = b5;
+			b3 = b3->next;
+			b4 = b5 = b2->bookarray->array;
+			while(b4)
+			{
+				b5 = b5->next;
+				free(b4->authors);
+				free(b4->title);
+				free(b4);
+				b4 = b5;
+			}
+			free(b2->bookarray);
+			free(b2->cc);
+			free(b2);
+			b2 = b3;
 		}
-		free(b2->bookarray);
-		free(b2->cc);
-		free(b2);
-		b2 = b3;
+		free(bhead);
 	}
-	free(bhead);
 }

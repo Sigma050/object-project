@@ -43,6 +43,7 @@ static void main_menu()
 				printf("Sorry, the option you entered was invalid, please try again.");
 		}
 	}while(choice != 7);
+	return;
 }
 static void _Register_an_account()
 {
@@ -69,9 +70,9 @@ static void _Login()
 	{
 		chead = (CustomerArray*)malloc(len2);
 		c1 = chead->array = (Customer*)malloc(LEN2);
-		c1->account = (char*)malloc(9 * sizeof(char));
+		c1->account = (char*)malloc(10);
 		strcpy(c1->account, "librarian");
-		c1->passwords = (char*)malloc(9 * sizeof(char));
+		c1->passwords = (char*)malloc(10);
 		strcpy(c1->passwords, "librarian");
 		c1->next = NULL;
 		chead->length = 1;
@@ -159,25 +160,23 @@ void run_interface() {
 	findbook_cleanup();
 	Book_cleanup();
 	Customer_cleanup();
-	Borrow_cleanup();
-
-	return;
+	//Borrow_cleanup();
 }
 void load()
 {
-	FILE *fp1, *fp2, *fp3;
+	FILE *fp1, *fp2;
 	fp1 = fopen("booksma", "rb");
 	fp2 = fopen("customerma", "rb");
-	fp3 = fopen("borrowma", "rb");
-	if(load_books(fp1) == 0 && load_customer(fp2) == 0 && load_borrow(fp3) == 0);
+	//fp3 = fopen("borrowma", "rb");//load_borrow(fp3//
+	if(load_books(fp1) == 0 && load_customer(fp2) == 0);
 	printf("Load successfully");
 }
 void save()
 {
-	FILE *fp1, *fp2, *fp3;
+	FILE *fp1, *fp2;
 	fp1 = fopen("booksma","wb");
 	fp2 = fopen("customerma","wb");
-	fp3 = fopen("borrowma","wb");
-	if(store_books(fp1) == 0 && store_customer(fp2) == 0 && store_borrow(fp3) == 0);
+	//fp3 = fopen("borrowma","wb");
+	if(store_books(fp1) == 0 && store_customer(fp2) == 0);
 	printf("Save successfully");
 }

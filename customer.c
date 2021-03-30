@@ -1,8 +1,13 @@
 #include "customer.h"
 int store_customer(FILE *file)
 {
+	if(file == NULL)
+	{
+		printf("Open file failed");
+		return 1;
+	}
 	c2 = chead->array;
-	fwrite(&chead->length, sizeof(chead->length), 1, file);
+	fwrite(&(chead->length), sizeof(chead->length), 1, file);
 	while(c2)
 	{
 		int leng1 = strlen(c2->account), leng2 = strlen(c2->passwords);
@@ -10,10 +15,11 @@ int store_customer(FILE *file)
 		fwrite(&leng2, sizeof(leng2), 1, file);
 		c2 = c2->next;
 	}
+	c2 = chead->array;
 	while(c2)
 	{
-		fwrite(c2->account, sizeof(c2->account), 1, file);
-		fwrite(c2->passwords, sizeof(c2->passwords), 1, file);
+		fwrite(c2->account, strlen(c2->account) + 1, 1, file);
+		fwrite(c2->passwords, strlen(c2->passwords) + 1, 1, file);
 		c2 = c2->next;
 	}
 	fclose(file);
@@ -21,6 +27,11 @@ int store_customer(FILE *file)
 }
 int load_customer(FILE *file)
 {
+	if(file == NULL)
+	{
+		printf("Open file failed");
+		return 1;
+	}
 	chead = (CustomerArray*)malloc(len2);
 	c1 = chead->array = (Customer*)malloc(LEN2);
 	c1->next = NULL;
@@ -28,17 +39,16 @@ int load_customer(FILE *file)
 	int acclen[chead->length], paslen[chead->length];
 	for(int i = 0;i < chead->length;i++) 
 	{
-		fread(&acclen[i], sizeof(acclen[i]), 1, file);
-		fread(&paslen[i], sizeof(paslen[i]), 1, file);
+		fread(&acclen[i], sizeof(int), 1, file);
+		fread(&paslen[i], sizeof(int), 1, file);
 	}
-	c1 = c1->next = (Customer*)malloc(LEN2);
 	for(int i = 0;i < chead->length;i++)
 	{
-		c1->account = (char *)malloc(acclen[i]*(sizeof(char))); 
-		c1->passwords = (char *)malloc(paslen[i]*(sizeof(char)));
-		fread(c1->account, acclen[i]*(sizeof(char)), 1, file);
-		fread(c1->passwords, paslen[i]*(sizeof(char)), 1, file);
 		c1 = c1->next = (Customer*)malloc(LEN2);
+		c1->account = (char *)malloc(acclen[i] + 1); 
+		c1->passwords = (char *)malloc(paslen[i] + 1);
+		fread(&c1->account, acclen[i] + 1, 1, file);
+		fread(&c1->passwords, paslen[i] + 1, 1, file);
 	}
 	fclose(file);
 	return 0;
@@ -139,6 +149,7 @@ void Customer_cleanup()
 		free(c2);
 		c2 = c3;
 	}
-	
+	free(chead);
+	chead = NULL;
 }
 
